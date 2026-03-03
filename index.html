@@ -1,0 +1,1090 @@
+import os, zipfile, pathlib
+
+base = "/mnt/data/cfo_site"
+os.makedirs(base, exist_ok=True)
+
+index_html = """<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Елена Ермолова — Антикризисный CFO для МСБ</title>
+  <meta name="description" content="Антикризисный CFO для собственников МСБ: управляемость, cash-flow, маржа, EBITDA uplift, подготовка к инвестициям." />
+  <meta property="og:title" content="Елена Ермолова — Антикризисный CFO" />
+  <meta property="og:description" content="Возвращаю контроль над деньгами и прибылью: cash-flow, маржа, EBITDA uplift, прозрачность для собственника и банков." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#0b1220" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <a class="brand" href="#top" aria-label="На верх страницы">
+        <span class="brand__mark">◆</span>
+        <span class="brand__text" data-i18n="brand">Антикризисный CFO</span>
+      </a>
+
+      <nav class="nav">
+        <a href="#pain" data-i18n="nav_pain">Проблемы</a>
+        <a href="#results" data-i18n="nav_results">Результаты</a>
+        <a href="#offer" data-i18n="nav_offer">Услуга</a>
+        <a href="#calculator" data-i18n="nav_calc">Калькулятор</a>
+        <a href="#contact" data-i18n="nav_contact">Контакты</a>
+      </nav>
+
+      <div class="actions">
+        <div class="lang">
+          <button class="chip chip--ghost" id="lang-ru" title="Русский">🇷🇺 RU</button>
+          <button class="chip chip--ghost" id="lang-en" title="English">🇬🇧 EN</button>
+        </div>
+        <a class="chip chip--gold" href="#contact" data-i18n="cta_top">Диагностика 🚀</a>
+      </div>
+
+      <button class="burger" id="burger" aria-label="Открыть меню">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <div class="mobile" id="mobile">
+      <a href="#pain" data-i18n="nav_pain">Проблемы</a>
+      <a href="#results" data-i18n="nav_results">Результаты</a>
+      <a href="#offer" data-i18n="nav_offer">Услуга</a>
+      <a href="#calculator" data-i18n="nav_calc">Калькулятор</a>
+      <a href="#contact" data-i18n="nav_contact">Контакты</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero__grid">
+        <div class="hero__copy reveal">
+          <div class="badge">
+            <span>💼</span>
+            <span data-i18n="hero_badge">Для собственников МСБ • cash-flow • маржа • контроль</span>
+          </div>
+
+          <h1>
+            <span data-i18n="hero_name">Елена Ермолова</span><br/>
+            <span class="grad" data-i18n="hero_title">Антикризисный CFO</span>
+            <span class="sub" data-i18n="hero_sub">который возвращает управляемость бизнесу</span>
+          </h1>
+
+          <p class="lead" data-i18n="hero_lead">
+            Если выручка растёт, а денег “вечно нет” — я выстраиваю финансовую систему, которая делает прибыль и ликвидность предсказуемыми.
+          </p>
+
+          <div class="hero__kpis">
+            <div class="kpi">
+              <div class="kpi__num" data-counter="70">0</div>
+              <div class="kpi__txt" data-i18n="kpi1">снижение кассовых разрывов</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi__num" data-counter="43">0</div>
+              <div class="kpi__txt" data-i18n="kpi2">млн ₽ экономия процентов</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi__num" data-counter="12">0</div>
+              <div class="kpi__txt" data-i18n="kpi3">% снижение себестоимости</div>
+            </div>
+          </div>
+
+          <div class="hero__cta">
+            <a class="btn btn--gold" href="#contact" data-i18n="hero_cta1">Запросить диагностику ✉️</a>
+            <a class="btn btn--ghost" href="#calculator" data-i18n="hero_cta2">Посчитать эффект 📊</a>
+          </div>
+
+          <div class="trust" aria-label="Сигналы доверия">
+            <span class="trust__item">✅ CIMA P1/P2</span>
+            <span class="trust__item">🏦 Банки / ковенанты / финансирование</span>
+            <span class="trust__item">🤖 AI-оптимизация процессов</span>
+          </div>
+        </div>
+
+        <div class="hero__card reveal">
+          <div class="profile">
+            <div class="avatar" role="img" aria-label="Фото">
+              <div class="avatar__ring"></div>
+              <div class="avatar__shine"></div>
+            </div>
+
+            <div class="profile__meta">
+              <div class="profile__role" data-i18n="hero_right_role">CFO / Head of Finance</div>
+              <div class="profile__line">⚡ <span data-i18n="hero_right_line1">60–90 дней: финансовая управляемость</span></div>
+              <div class="profile__line">🛡️ <span data-i18n="hero_right_line2">защита маржи и ликвидности</span></div>
+              <div class="profile__line">📌 <span data-i18n="hero_right_line3">проекты • группы компаний • кризис</span></div>
+            </div>
+
+            <div class="profile__cta">
+              <a class="chip chip--ghost" href="#offer">💎 <span data-i18n="hero_right_chip1">Формат работы</span></a>
+              <a class="chip chip--ghost" href="#results">📈 <span data-i18n="hero_right_chip2">Доказательства</span></a>
+              <a class="chip chip--ghost" href="#calculator">🧮 <span data-i18n="hero_right_chip3">ROI/EBITDA</span></a>
+            </div>
+          </div>
+
+          <div class="note">
+            <div class="note__title">✨ <span data-i18n="note_title">Скорость решений</span></div>
+            <div class="note__text" data-i18n="note_text">
+              AI-инструменты сокращают время на аналитику, проверку договоров, поиск поставщиков и подготовку управленческой отчётности — без расширения штата.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="scrollhint" aria-hidden="true">⌄</div>
+    </section>
+
+    <section class="section" id="pain">
+      <div class="wrap">
+        <div class="section__head reveal">
+          <h2 data-i18n="pain_title">⚠️ Сигналы, что пора подключать CFO</h2>
+          <p class="muted" data-i18n="pain_sub">Не “учёт ради учёта”, а управляемость: деньги → решения → результат.</p>
+        </div>
+
+        <div class="grid4">
+          <div class="card reveal">
+            <div class="icon">💸</div>
+            <div class="card__title" data-i18n="pain1_t">Кассовые разрывы</div>
+            <div class="card__text" data-i18n="pain1_s">Платежи “вручную”, хаос в приоритетах, долги копятся.</div>
+          </div>
+          <div class="card reveal">
+            <div class="icon">📉</div>
+            <div class="card__title" data-i18n="pain2_t">Выручка есть — прибыли нет</div>
+            <div class="card__text" data-i18n="pain2_s">Маржа растворяется в себестоимости, скидках и ошибках.</div>
+          </div>
+          <div class="card reveal">
+            <div class="icon">🏦</div>
+            <div class="card__title" data-i18n="pain3_t">Давит кредитная нагрузка</div>
+            <div class="card__text" data-i18n="pain3_s">Нужны понятные ковенанты, график, контроль DSO/DPO.</div>
+          </div>
+          <div class="card reveal">
+            <div class="icon">🧾</div>
+            <div class="card__title" data-i18n="pain4_t">Нет цифр для решений</div>
+            <div class="card__text" data-i18n="pain4_s">Непрозрачные направления, нет P&L, нет прогнозов.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="results">
+      <div class="wrap">
+        <div class="section__head reveal">
+          <h2 data-i18n="res_title">📈 Результаты, которые понимает собственник</h2>
+          <p class="muted" data-i18n="res_sub">Цифры — это язык доверия. Ниже — подтверждённые эффекты из опыта.</p>
+        </div>
+
+        <div class="stats">
+          <div class="stat reveal">
+            <div class="stat__big">70%</div>
+            <div class="stat__txt" data-i18n="res1">сокращение кассовых разрывов (100 → 30 млн ₽)</div>
+          </div>
+          <div class="stat reveal">
+            <div class="stat__big">43 млн ₽</div>
+            <div class="stat__txt" data-i18n="res2">экономия процентов за счёт ускорения продаж/оборачиваемости</div>
+          </div>
+          <div class="stat reveal">
+            <div class="stat__big">12%</div>
+            <div class="stat__txt" data-i18n="res3">снижение себестоимости</div>
+          </div>
+          <div class="stat reveal">
+            <div class="stat__big">40 млн ₽</div>
+            <div class="stat__txt" data-i18n="res4">защита маржи</div>
+          </div>
+        </div>
+
+        <div class="pillbox reveal">
+          <div class="pill">🧩 <span data-i18n="res_p1">управленческий учёт (БДР/БДДС)</span></div>
+          <div class="pill">🧠 <span data-i18n="res_p2">сценарное моделирование</span></div>
+          <div class="pill">🔁 <span data-i18n="res_p3">платёжный календарь</span></div>
+          <div class="pill">🧷 <span data-i18n="res_p4">финмодели / unit-экономика</span></div>
+          <div class="pill">🤖 <span data-i18n="res_p5">AI-ускорение процессов</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="offer">
+      <div class="wrap">
+        <div class="section__head reveal">
+          <h2 data-i18n="offer_title">💎 Услуга: Антикризисный CFO на проект</h2>
+          <p class="muted" data-i18n="offer_sub">Формат для собственника: быстро, прозрачно, с измеримым эффектом.</p>
+        </div>
+
+        <div class="offer">
+          <div class="offer__left reveal">
+            <div class="timeline">
+              <div class="step">
+                <div class="step__n">1</div>
+                <div class="step__body">
+                  <div class="step__t" data-i18n="st1_t">Диагностика 7–10 дней</div>
+                  <div class="step__s" data-i18n="st1_s">карта рисков, cash-gap, маржа, обязательства, “узкие места”.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step__n">2</div>
+                <div class="step__body">
+                  <div class="step__t" data-i18n="st2_t">Стабилизация 30 дней</div>
+                  <div class="step__s" data-i18n="st2_s">БДДС/платёжный календарь, правила оплат, приоритеты, контроль.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step__n">3</div>
+                <div class="step__body">
+                  <div class="step__t" data-i18n="st3_t">Архитектура 30–60 дней</div>
+                  <div class="step__s" data-i18n="st3_s">управленческий учёт, P&L по направлениям, бюджеты, сценарии.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step__n">4</div>
+                <div class="step__body">
+                  <div class="step__t" data-i18n="st4_t">Оптимизация и рост</div>
+                  <div class="step__s" data-i18n="st4_s">себестоимость, маржа, переговоры с банками, подготовка к инвестициям.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="offer__right reveal">
+            <div class="pricecard">
+              <div class="pricecard__top">
+                <div class="pricecard__badge">⚡ <span data-i18n="pc_badge">быстрый вход</span></div>
+                <div class="pricecard__title" data-i18n="pc_title">Что вы получаете</div>
+              </div>
+
+              <ul class="list">
+                <li>📊 <span data-i18n="pc1">управленческая картина бизнеса</span></li>
+                <li>🧾 <span data-i18n="pc2">правила денег и оплат</span></li>
+                <li>🛡️ <span data-i18n="pc3">защита маржи + контроль себестоимости</span></li>
+                <li>🧭 <span data-i18n="pc4">план/факт и прогноз cash-flow</span></li>
+                <li>🏁 <span data-i18n="pc5">система, которую можно передать команде</span></li>
+              </ul>
+
+              <div class="pricecard__cta">
+                <a class="btn btn--gold" href="#contact" data-i18n="pc_cta">Получить КП ✉️</a>
+                <div class="fine" data-i18n="pc_fine">Стоимость зависит от масштаба и целей (МСБ). Обсудим за 15 минут.</div>
+              </div>
+
+              <div class="stripe" aria-hidden="true"></div>
+            </div>
+
+            <div class="ai reveal">
+              <div class="ai__t">🤖 <span data-i18n="ai_title">AI как рычаг эффективности</span></div>
+              <div class="ai__s" data-i18n="ai_sub">
+                Подбор поставщиков, первичная проверка договоров, анализ конкурентов, ускорение отчётности и подготовки презентаций собственнику.
+              </div>
+              <div class="ai__chips">
+                <span class="chip chip--ghost">🧠 GPT</span>
+                <span class="chip chip--ghost">📑 договоры</span>
+                <span class="chip chip--ghost">🛒 закупки</span>
+                <span class="chip chip--ghost">📣 маркетинг</span>
+                <span class="chip chip--ghost">📌 ПТО/бух.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="section section--alt" id="calculator">
+      <div class="wrap">
+        <div class="section__head reveal">
+          <h2 data-i18n="calc_title">🧮 Калькулятор эффекта (ROI + EBITDA uplift)</h2>
+          <p class="muted" data-i18n="calc_sub">Для встречи с собственником: меняйте цифры — графики обновятся.</p>
+        </div>
+
+        <div class="calc">
+          <div class="calc__form reveal">
+            <div class="formgrid">
+              <label>
+                <span data-i18n="c1">Кассовый разрыв, ₽ (в мес.)</span>
+                <input id="cashGap" type="number" value="10000000" min="0" step="1000" />
+              </label>
+              <label>
+                <span data-i18n="c2">Сокращение разрыва, %</span>
+                <input id="gapReduce" type="number" value="50" min="0" max="100" step="1" />
+              </label>
+              <label>
+                <span data-i18n="c3">Ставка финансирования, % годовых</span>
+                <input id="rate" type="number" value="20" min="0" step="0.1" />
+              </label>
+              <label>
+                <span data-i18n="c4">Годовой оборот, ₽</span>
+                <input id="turnover" type="number" value="200000000" min="0" step="1000" />
+              </label>
+              <label>
+                <span data-i18n="c5">Снижение себестоимости, %</span>
+                <input id="costDown" type="number" value="5" min="0" max="100" step="0.5" />
+              </label>
+              <label>
+                <span data-i18n="c6">Защита маржи, ₽</span>
+                <input id="marginProtect" type="number" value="20000000" min="0" step="1000" />
+              </label>
+              <label>
+                <span data-i18n="c7">Стоимость проекта CFO, ₽</span>
+                <input id="cfoCost" type="number" value="1500000" min="0" step="1000" />
+              </label>
+
+              <div class="divider"></div>
+
+              <label>
+                <span data-i18n="c8">EBITDA маржа, % (если знаете)</span>
+                <input id="ebitdaMargin" type="number" value="12" min="0" max="100" step="0.5" />
+              </label>
+              <label>
+                <span data-i18n="c9">EBITDA uplift, %</span>
+                <input id="ebitdaUpliftPct" type="number" value="2" min="0" max="100" step="0.1" />
+              </label>
+              <label>
+                <span data-i18n="c10">Мультипликатор EV/EBITDA</span>
+                <input id="multiple" type="number" value="5" min="0" step="0.1" />
+              </label>
+            </div>
+
+            <button class="btn btn--gold btn--full" id="recalc" data-i18n="calc_btn">Пересчитать эффект ✨</button>
+
+            <div class="hint" data-i18n="calc_hint">
+              * Формулы упрощены для демонстрации и переговоров. Для точного расчёта — диагностика и сверка данных.
+            </div>
+          </div>
+
+          <div class="calc__dash reveal">
+            <div class="kcards">
+              <div class="kcard">
+                <div class="kcard__t" data-i18n="out1">Общий эффект, ₽</div>
+                <div class="kcard__v" id="outTotal">—</div>
+              </div>
+              <div class="kcard" id="roiCard">
+                <div class="kcard__t" data-i18n="out2">ROI, %</div>
+                <div class="kcard__v" id="outROI">—</div>
+                <div class="kcard__s" data-i18n="roi_rule">Авто-подсветка если ROI &lt; 100%</div>
+              </div>
+              <div class="kcard">
+                <div class="kcard__t" data-i18n="out3">Окупаемость, мес.</div>
+                <div class="kcard__v" id="outPayback">—</div>
+              </div>
+              <div class="kcard">
+                <div class="kcard__t" data-i18n="out4">Прирост стоимости бизнеса, ₽</div>
+                <div class="kcard__v" id="outValue">—</div>
+              </div>
+            </div>
+
+            <div class="charts">
+              <div class="chartbox">
+                <div class="chartbox__t" data-i18n="ch1">Структура эффекта</div>
+                <canvas id="pie"></canvas>
+              </div>
+              <div class="chartbox">
+                <div class="chartbox__t" data-i18n="ch2">Окупаемость по месяцам</div>
+                <canvas id="line"></canvas>
+              </div>
+            </div>
+
+            <div class="scenarios">
+              <div class="scenarios__t" data-i18n="sc_title">Сценарии (стресс / базовый / оптимистичный)</div>
+              <div class="scgrid">
+                <div class="sc">
+                  <div class="sc__h">🧊 <span data-i18n="sc_stress">Стресс</span></div>
+                  <div class="sc__p" id="scStress">—</div>
+                </div>
+                <div class="sc">
+                  <div class="sc__h">⚙️ <span data-i18n="sc_base">Базовый</span></div>
+                  <div class="sc__p" id="scBase">—</div>
+                </div>
+                <div class="sc">
+                  <div class="sc__h">🔥 <span data-i18n="sc_opt">Оптимистичный</span></div>
+                  <div class="sc__p" id="scOpt">—</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="wrap">
+        <div class="contact reveal">
+          <div class="contact__left">
+            <h2 data-i18n="contact_title">📩 Контакт и следующий шаг</h2>
+            <p class="muted" data-i18n="contact_sub">
+              Напишите 2–3 цифры (оборот, кассовый разрыв, кредитная нагрузка) — и я предложу формат работы.
+            </p>
+
+            <div class="contact__cards">
+              <a class="citem" href="mailto:example@email.com">
+                ✉️ <span>Email</span><span class="citem__v">example@email.com</span>
+              </a>
+              <a class="citem" href="https://t.me/yourname" target="_blank" rel="noopener">
+                💬 <span>Telegram</span><span class="citem__v">@yourname</span>
+              </a>
+              <a class="citem" href="tel:+70000000000">
+                📞 <span data-i18n="phone">Телефон</span><span class="citem__v">+7 000 000-00-00</span>
+              </a>
+              <div class="citem">
+                📍 <span data-i18n="geo">Локация</span><span class="citem__v" data-i18n="geo_v">Россия / удалённо</span>
+              </div>
+            </div>
+
+            <div class="mini">
+              <div class="mini__t" data-i18n="mini_title">Что будет на диагностике (60 минут)</div>
+              <ul>
+                <li data-i18n="mini1">карта финансовых рисков и “утечек”</li>
+                <li data-i18n="mini2">быстрые действия на 14 дней</li>
+                <li data-i18n="mini3">план на 60–90 дней с KPI</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="contact__right">
+            <div class="formcard">
+              <div class="formcard__t" data-i18n="form_title">Быстрый запрос</div>
+              <p class="formcard__s" data-i18n="form_sub">
+                Это не форма отправки (для GitHub Pages без бэкенда). Нажмите кнопку — откроется черновик письма.
+              </p>
+
+              <label class="flabel">
+                <span data-i18n="f1">Имя</span>
+                <input id="fName" placeholder="Иван" />
+              </label>
+              <label class="flabel">
+                <span data-i18n="f2">Компания и оборот</span>
+                <input id="fBiz" placeholder="ООО «…», 250 млн ₽/год" />
+              </label>
+              <label class="flabel">
+                <span data-i18n="f3">Ключевая проблема</span>
+                <textarea id="fProb" rows="4" placeholder="Кассовые разрывы, маржа, кредиты..."></textarea>
+              </label>
+
+              <button class="btn btn--gold btn--full" id="mailBtn" data-i18n="mail_btn">Открыть письмо ✉️</button>
+              <div class="fine" data-i18n="form_fine">Для Tilda можно подключить штатную форму — скажите, сделаю под ваш аккаунт.</div>
+
+              <div class="sig">
+                <span>🧿</span>
+                <span data-i18n="sig">Фокус: предсказуемость денег и прибыли</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="footer__left">© <span id="year"></span> <span data-i18n="foot">Елена Ермолова • CFO</span></div>
+          <div class="footer__right">
+            <a href="#top">↑ <span data-i18n="to_top">Наверх</span></a>
+            <span class="dot">•</span>
+            <a href="#calculator" data-i18n="to_calc">Калькулятор</a>
+          </div>
+        </footer>
+      </div>
+    </section>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+</html>
+"""
+
+styles_css = """:root{
+  --bg:#0b1220;
+  --bg2:#0f172a;
+  --card:#111b2f;
+  --card2:#0e1628;
+  --line:rgba(255,255,255,.10);
+  --muted:rgba(255,255,255,.72);
+  --muted2:rgba(255,255,255,.55);
+  --gold:#f5c542;
+  --gold2:#ffd56a;
+  --shadow: 0 18px 50px rgba(0,0,0,.35);
+  --radius:22px;
+  --avatar:url('https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=800&q=80'); /* ЗАМЕНИТЕ НА СВОЁ ФОТО */
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#fff;scroll-behavior:smooth}
+a{color:inherit}
+.wrap{width:min(1180px,92vw);margin:0 auto}
+.bg-glow{
+  position:fixed;inset:-40vh -40vw;
+  background:
+    radial-gradient(60vh 60vh at 20% 10%, rgba(245,197,66,.18), transparent 55%),
+    radial-gradient(50vh 50vh at 80% 20%, rgba(99,102,241,.16), transparent 55%),
+    radial-gradient(70vh 70vh at 50% 90%, rgba(16,185,129,.10), transparent 55%);
+  filter: blur(10px);
+  pointer-events:none;z-index:-1
+}
+
+.topbar{position:sticky;top:0;z-index:50;background:rgba(11,18,32,.75);backdrop-filter: blur(10px);border-bottom:1px solid var(--line)}
+.topbar__inner{display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand__mark{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+  background:linear-gradient(135deg, rgba(245,197,66,.28), rgba(255,255,255,.08));
+  border:1px solid rgba(245,197,66,.25);box-shadow:0 10px 30px rgba(245,197,66,.12)
+}
+.brand__text{font-weight:800;letter-spacing:.2px}
+.nav{display:flex;gap:16px}
+.nav a{font-size:14px;text-decoration:none;color:var(--muted);padding:8px 10px;border-radius:12px;border:1px solid transparent}
+.nav a:hover{color:#fff;border-color:rgba(255,255,255,.10);background:rgba(255,255,255,.04)}
+.actions{display:flex;align-items:center;gap:12px}
+.lang{display:flex;gap:8px}
+
+.chip{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:999px;font-weight:700;font-size:13px;text-decoration:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);cursor:pointer}
+.chip--gold{background:linear-gradient(135deg, rgba(245,197,66,1), rgba(255,213,106,1));color:#111;border-color:rgba(255,255,255,.22)}
+.chip--ghost{color:#fff}
+.chip:hover{transform:translateY(-1px)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 18px;border-radius:16px;text-decoration:none;font-weight:800;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.btn--gold{background:linear-gradient(135deg, rgba(245,197,66,1), rgba(255,213,106,1));color:#0b1220;border-color:rgba(255,255,255,.25)}
+.btn--ghost{color:#fff}
+.btn--full{width:100%}
+.btn:hover{transform:translateY(-2px)}
+
+.burger{display:none;flex-direction:column;gap:5px;background:transparent;border:0;cursor:pointer}
+.burger span{display:block;width:22px;height:2px;background:rgba(255,255,255,.85);border-radius:2px}
+.mobile{display:none;border-top:1px solid var(--line);padding:12px 0}
+.mobile a{display:block;padding:10px 0;color:var(--muted);text-decoration:none}
+.mobile a:hover{color:#fff}
+@media (max-width: 960px){
+  .nav{display:none}
+  .burger{display:flex}
+}
+
+.hero{padding:78px 0 56px;position:relative}
+.hero__grid{display:grid;grid-template-columns:1.35fr .85fr;gap:28px;align-items:start}
+@media (max-width: 960px){.hero__grid{grid-template-columns:1fr}}
+.badge{display:inline-flex;gap:10px;align-items:center;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);color:var(--muted);font-weight:700;font-size:13px}
+h1{margin:14px 0 12px;font-size:52px;line-height:1.05;letter-spacing:-.8px}
+@media (max-width: 520px){h1{font-size:40px}}
+.grad{background:linear-gradient(135deg, rgba(245,197,66,1), rgba(255,255,255,.95));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{display:block;margin-top:10px;font-weight:600;color:var(--muted);font-size:18px}
+.lead{color:var(--muted);font-size:18px;max-width:58ch}
+.hero__cta{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap}
+.hero__kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+@media (max-width: 520px){.hero__kpis{grid-template-columns:1fr}}
+.kpi{padding:14px 14px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10)}
+.kpi__num{font-size:28px;font-weight:900;letter-spacing:-.5px}
+.kpi__txt{color:var(--muted2);font-size:13px;font-weight:700}
+.trust{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+.trust__item{font-size:12px;color:var(--muted);padding:8px 10px;border:1px solid rgba(255,255,255,.10);border-radius:999px;background:rgba(255,255,255,.03)}
+
+.hero__card{background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.10);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;position:relative;overflow:hidden}
+.hero__card:before{
+  content:"";position:absolute;inset:-2px;
+  background: radial-gradient(400px 300px at 20% 10%, rgba(245,197,66,.24), transparent 60%),
+              radial-gradient(450px 350px at 90% 20%, rgba(99,102,241,.18), transparent 60%);
+  pointer-events:none;
+}
+.profile{position:relative;display:grid;gap:14px}
+.avatar{position:relative;height:190px;border-radius:18px;overflow:hidden;background:
+  linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+  var(--avatar) center/cover no-repeat;
+  border:1px solid rgba(255,255,255,.10)
+}
+.avatar__ring{position:absolute;inset:14px;border-radius:16px;border:1px solid rgba(245,197,66,.25);box-shadow:0 0 0 1px rgba(255,255,255,.06) inset}
+.avatar__shine{position:absolute;inset:-20% -50%;background:linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);transform:rotate(18deg);animation:shine 6s infinite}
+@keyframes shine{0%{transform:translateX(-30%) rotate(18deg)} 55%{transform:translateX(130%) rotate(18deg)} 100%{transform:translateX(130%) rotate(18deg)}}
+
+.profile__role{font-weight:900;letter-spacing:.2px}
+.profile__line{color:var(--muted);font-weight:700;font-size:14px}
+.profile__cta{display:flex;gap:10px;flex-wrap:wrap}
+
+.note{position:relative;margin-top:12px;padding:14px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10)}
+.note__title{font-weight:900;margin-bottom:6px}
+.note__text{color:var(--muted);font-size:13px}
+
+.scrollhint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);opacity:.6;animation:bob 1.4s infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,6px)}}
+
+.section{padding:70px 0;border-top:1px solid rgba(255,255,255,.06)}
+.section--alt{background:rgba(255,255,255,.02)}
+.section__head{margin-bottom:26px}
+h2{margin:0 0 10px;font-size:34px;letter-spacing:-.4px}
+@media (max-width: 520px){h2{font-size:28px}}
+.muted{color:var(--muted);max-width:78ch}
+
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media (max-width: 980px){.grid4{grid-template-columns:repeat(2,1fr)}}
+@media (max-width: 520px){.grid4{grid-template-columns:1fr}}
+.card{
+  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:20px;
+  padding:18px;
+  box-shadow:0 14px 40px rgba(0,0,0,.22);
+}
+.icon{font-size:22px;margin-bottom:8px}
+.card__title{font-weight:900;margin-bottom:6px}
+.card__text{color:var(--muted);font-size:14px}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media (max-width: 980px){.stats{grid-template-columns:repeat(2,1fr)}}
+@media (max-width: 520px){.stats{grid-template-columns:1fr}}
+.stat{padding:18px;border-radius:20px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10)}
+.stat__big{font-size:26px;font-weight:900;color:var(--gold)}
+.stat__txt{color:var(--muted);font-size:14px;margin-top:4px}
+
+.pillbox{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.pill{padding:10px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03);color:var(--muted);font-weight:800;font-size:12px}
+
+.offer{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:start}
+@media (max-width: 980px){.offer{grid-template-columns:1fr}}
+.timeline{display:grid;gap:12px}
+.step{display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:20px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10)}
+.step__n{width:32px;height:32px;border-radius:12px;display:grid;place-items:center;background:rgba(245,197,66,.18);border:1px solid rgba(245,197,66,.25);font-weight:900;color:var(--gold)}
+.step__t{font-weight:900}
+.step__s{color:var(--muted);font-size:13px;margin-top:2px}
+
+.pricecard{position:relative;border-radius:22px;padding:18px;background:linear-gradient(180deg, rgba(245,197,66,.10), rgba(255,255,255,.02));border:1px solid rgba(245,197,66,.22);overflow:hidden;box-shadow:var(--shadow)}
+.pricecard__badge{display:inline-flex;gap:8px;align-items:center;font-weight:900;color:var(--gold);background:rgba(0,0,0,.25);padding:8px 10px;border:1px solid rgba(255,255,255,.10);border-radius:999px}
+.pricecard__title{font-weight:900;margin-top:10px;font-size:18px}
+.list{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+.list li{display:flex;gap:10px;align-items:flex-start;color:var(--muted);font-weight:700}
+.pricecard__cta{margin-top:14px}
+.fine{margin-top:10px;color:var(--muted2);font-size:12px;font-weight:700}
+.stripe{position:absolute;inset:-40% -30%;background:linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);transform:rotate(12deg);animation:shine 7s infinite}
+
+.ai{margin-top:12px;padding:16px;border-radius:20px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10)}
+.ai__t{font-weight:900}
+.ai__s{color:var(--muted);font-size:13px;margin-top:6px}
+.ai__chips{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+
+.calc{display:grid;grid-template-columns:.95fr 1.05fr;gap:16px;align-items:start}
+@media (max-width: 1100px){.calc{grid-template-columns:1fr}}
+.calc__form{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10);border-radius:22px;padding:16px}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (max-width: 620px){.formgrid{grid-template-columns:1fr}}
+label span{display:block;font-size:12px;font-weight:900;color:var(--muted);margin-bottom:6px}
+input, textarea{
+  width:100%;padding:12px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.22);color:#fff;font-weight:800;outline:none
+}
+input:focus, textarea:focus{border-color:rgba(245,197,66,.45);box-shadow:0 0 0 3px rgba(245,197,66,.12)}
+.divider{grid-column:1/-1;height:1px;background:rgba(255,255,255,.08);margin:4px 0}
+
+.hint{margin-top:10px;color:var(--muted2);font-size:12px;font-weight:700}
+
+.calc__dash{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.10);border-radius:22px;padding:16px}
+.kcards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (max-width: 620px){.kcards{grid-template-columns:1fr}}
+.kcard{padding:14px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10)}
+.kcard__t{font-size:12px;font-weight:900;color:var(--muted)}
+.kcard__v{font-size:22px;font-weight:900;margin-top:4px}
+.kcard__s{margin-top:6px;color:var(--muted2);font-size:11px;font-weight:800}
+.kcard--bad{border-color:rgba(255,105,105,.40);background:rgba(255,105,105,.08)}
+
+.charts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+@media (max-width: 920px){.charts{grid-template-columns:1fr}}
+.chartbox{padding:12px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10)}
+.chartbox__t{font-weight:900;color:var(--muted);font-size:12px;margin-bottom:8px}
+
+.scenarios{margin-top:12px;padding:12px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10)}
+.scenarios__t{font-weight:900;color:var(--muted);font-size:12px;margin-bottom:10px}
+.scgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width: 720px){.scgrid{grid-template-columns:1fr}}
+.sc{padding:12px;border-radius:16px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.10)}
+.sc__h{font-weight:900}
+.sc__p{margin-top:4px;color:var(--gold);font-weight:900}
+
+.contact{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:start}
+@media (max-width: 980px){.contact{grid-template-columns:1fr}}
+.contact__cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
+@media (max-width: 620px){.contact__cards{grid-template-columns:1fr}}
+.citem{display:flex;justify-content:space-between;gap:10px;padding:12px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10);text-decoration:none;color:#fff}
+.citem__v{color:var(--gold);font-weight:900;white-space:nowrap}
+.mini{margin-top:16px;padding:14px;border-radius:20px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10)}
+.mini__t{font-weight:900;margin-bottom:8px}
+.mini ul{margin:0;padding-left:18px;color:var(--muted);font-weight:800;font-size:13px}
+
+.formcard{padding:16px;border-radius:22px;background:linear-gradient(180deg, rgba(99,102,241,.12), rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.10);box-shadow:var(--shadow)}
+.formcard__t{font-weight:900;font-size:18px}
+.formcard__s{color:var(--muted);font-weight:700;font-size:13px}
+.flabel{display:block;margin-top:10px}
+.sig{display:flex;gap:10px;align-items:center;margin-top:12px;color:var(--muted);font-weight:900}
+
+.footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.08);color:var(--muted);font-weight:800;font-size:12px}
+.footer a{text-decoration:none;color:var(--muted)}
+.footer a:hover{color:#fff}
+.dot{opacity:.6}
+
+.reveal{opacity:0;transform:translateY(10px);transition:opacity .7s ease, transform .7s ease}
+.reveal.is-in{opacity:1;transform:none}
+"""
+
+script_js = """// Mobile menu
+const burger = document.getElementById('burger');
+const mobile = document.getElementById('mobile');
+if (burger) {
+  burger.addEventListener('click', () => {
+    const open = mobile.style.display === 'block';
+    mobile.style.display = open ? 'none' : 'block';
+  });
+}
+document.querySelectorAll('.mobile a').forEach(a => a.addEventListener('click', () => mobile.style.display='none'));
+
+// Reveal on scroll
+const reveals = Array.from(document.querySelectorAll('.reveal'));
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('is-in'); });
+}, { threshold: 0.12 });
+reveals.forEach(el => io.observe(el));
+
+// Counters
+function animateCounters(){
+  document.querySelectorAll('[data-counter]').forEach(el => {
+    const target = Number(el.getAttribute('data-counter') || '0');
+    let start = 0;
+    const step = Math.max(1, Math.round(target / 70));
+    const t = setInterval(() => {
+      start += step;
+      if (start >= target) { start = target; clearInterval(t); }
+      el.textContent = `${start}`;
+    }, 18);
+  });
+}
+let countersStarted = false;
+const kpiBlock = document.querySelector('.hero__kpis');
+if (kpiBlock){
+  const io2 = new IntersectionObserver((entries) => {
+    if (!countersStarted && entries.some(e=>e.isIntersecting)) { countersStarted = true; animateCounters(); }
+  }, { threshold: 0.5 });
+  io2.observe(kpiBlock);
+}
+
+// i18n
+const dict = {
+  ru: {
+    brand:"Антикризисный CFO",
+    nav_pain:"Проблемы", nav_results:"Результаты", nav_offer:"Услуга", nav_calc:"Калькулятор", nav_contact:"Контакты",
+    cta_top:"Диагностика 🚀",
+    hero_badge:"Для собственников МСБ • cash-flow • маржа • контроль",
+    hero_name:"Елена Ермолова",
+    hero_title:"Антикризисный CFO",
+    hero_sub:"который возвращает управляемость бизнесу",
+    hero_lead:"Если выручка растёт, а денег “вечно нет” — я выстраиваю финансовую систему, которая делает прибыль и ликвидность предсказуемыми.",
+    kpi1:"снижение кассовых разрывов", kpi2:"млн ₽ экономия процентов", kpi3:"% снижение себестоимости",
+    hero_cta1:"Запросить диагностику ✉️", hero_cta2:"Посчитать эффект 📊",
+    hero_right_role:"CFO / Head of Finance",
+    hero_right_line1:"60–90 дней: финансовая управляемость",
+    hero_right_line2:"защита маржи и ликвидности",
+    hero_right_line3:"проекты • группы компаний • кризис",
+    hero_right_chip1:"Формат работы", hero_right_chip2:"Доказательства", hero_right_chip3:"ROI/EBITDA",
+    note_title:"Скорость решений",
+    note_text:"AI-инструменты сокращают время на аналитику, проверку договоров, поиск поставщиков и подготовку управленческой отчётности — без расширения штата.",
+    pain_title:"⚠️ Сигналы, что пора подключать CFO",
+    pain_sub:"Не “учёт ради учёта”, а управляемость: деньги → решения → результат.",
+    pain1_t:"Кассовые разрывы", pain1_s:"Платежи “вручную”, хаос в приоритетах, долги копятся.",
+    pain2_t:"Выручка есть — прибыли нет", pain2_s:"Маржа растворяется в себестоимости, скидках и ошибках.",
+    pain3_t:"Давит кредитная нагрузка", pain3_s:"Нужны понятные ковенанты, график, контроль DSO/DPO.",
+    pain4_t:"Нет цифр для решений", pain4_s:"Непрозрачные направления, нет P&L, нет прогнозов.",
+    res_title:"📈 Результаты, которые понимает собственник",
+    res_sub:"Цифры — это язык доверия. Ниже — подтверждённые эффекты из опыта.",
+    res1:"сокращение кассовых разрывов (100 → 30 млн ₽)",
+    res2:"экономия процентов за счёт ускорения продаж/оборачиваемости",
+    res3:"снижение себестоимости",
+    res4:"защита маржи",
+    res_p1:"управленческий учёт (БДР/БДДС)", res_p2:"сценарное моделирование", res_p3:"платёжный календарь", res_p4:"финмодели / unit-экономика", res_p5:"AI-ускорение процессов",
+    offer_title:"💎 Услуга: Антикризисный CFO на проект",
+    offer_sub:"Формат для собственника: быстро, прозрачно, с измеримым эффектом.",
+    st1_t:"Диагностика 7–10 дней", st1_s:"карта рисков, cash-gap, маржа, обязательства, “узкие места”.",
+    st2_t:"Стабилизация 30 дней", st2_s:"БДДС/платёжный календарь, правила оплат, приоритеты, контроль.",
+    st3_t:"Архитектура 30–60 дней", st3_s:"управленческий учёт, P&L по направлениям, бюджеты, сценарии.",
+    st4_t:"Оптимизация и рост", st4_s:"себестоимость, маржа, переговоры с банками, подготовка к инвестициям.",
+    pc_badge:"быстрый вход",
+    pc_title:"Что вы получаете",
+    pc1:"управленческая картина бизнеса",
+    pc2:"правила денег и оплат",
+    pc3:"защита маржи + контроль себестоимости",
+    pc4:"план/факт и прогноз cash-flow",
+    pc5:"система, которую можно передать команде",
+    pc_cta:"Получить КП ✉️",
+    pc_fine:"Стоимость зависит от масштаба и целей (МСБ). Обсудим за 15 минут.",
+    ai_title:"AI как рычаг эффективности",
+    ai_sub:"Подбор поставщиков, первичная проверка договоров, анализ конкурентов, ускорение отчётности и подготовки презентаций собственнику.",
+    calc_title:"🧮 Калькулятор эффекта (ROI + EBITDA uplift)",
+    calc_sub:"Для встречи с собственником: меняйте цифры — графики обновятся.",
+    c1:"Кассовый разрыв, ₽ (в мес.)", c2:"Сокращение разрыва, %", c3:"Ставка финансирования, % годовых",
+    c4:"Годовой оборот, ₽", c5:"Снижение себестоимости, %", c6:"Защита маржи, ₽", c7:"Стоимость проекта CFO, ₽",
+    c8:"EBITDA маржа, % (если знаете)", c9:"EBITDA uplift, %", c10:"Мультипликатор EV/EBITDA",
+    calc_btn:"Пересчитать эффект ✨",
+    calc_hint:"* Формулы упрощены для демонстрации и переговоров. Для точного расчёта — диагностика и сверка данных.",
+    out1:"Общий эффект, ₽", out2:"ROI, %", out3:"Окупаемость, мес.", out4:"Прирост стоимости бизнеса, ₽",
+    roi_rule:"Авто-подсветка если ROI < 100%",
+    ch1:"Структура эффекта", ch2:"Окупаемость по месяцам",
+    sc_title:"Сценарии (стресс / базовый / оптимистичный)", sc_stress:"Стресс", sc_base:"Базовый", sc_opt:"Оптимистичный",
+    contact_title:"📩 Контакт и следующий шаг",
+    contact_sub:"Напишите 2–3 цифры (оборот, кассовый разрыв, кредитная нагрузка) — и я предложу формат работы.",
+    phone:"Телефон", geo:"Локация", geo_v:"Россия / удалённо",
+    mini_title:"Что будет на диагностике (60 минут)",
+    mini1:"карта финансовых рисков и “утечек”",
+    mini2:"быстрые действия на 14 дней",
+    mini3:"план на 60–90 дней с KPI",
+    form_title:"Быстрый запрос",
+    form_sub:"Это не форма отправки (для GitHub Pages без бэкенда). Нажмите кнопку — откроется черновик письма.",
+    f1:"Имя", f2:"Компания и оборот", f3:"Ключевая проблема",
+    mail_btn:"Открыть письмо ✉️",
+    form_fine:"Для Tilda можно подключить штатную форму — скажите, сделаю под ваш аккаунт.",
+    sig:"Фокус: предсказуемость денег и прибыли",
+    foot:"Елена Ермолова • CFO",
+    to_top:"Наверх", to_calc:"Калькулятор"
+  },
+  en: {
+    brand:"Turnaround CFO",
+    nav_pain:"Pain", nav_results:"Proof", nav_offer:"Offer", nav_calc:"Calculator", nav_contact:"Contact",
+    cta_top:"Diagnostics 🚀",
+    hero_badge:"For SMB owners • cash-flow • margin • control",
+    hero_name:"Elena Ermolova",
+    hero_title:"Turnaround CFO",
+    hero_sub:"who restores financial control",
+    hero_lead:"If revenue grows but cash is always tight — I build a finance system that makes profit and liquidity predictable.",
+    kpi1:"cash-gap reduction", kpi2:"mln ₽ interest saved", kpi3:"% cost reduction",
+    hero_cta1:"Request diagnostics ✉️", hero_cta2:"Estimate impact 📊",
+    hero_right_role:"CFO / Head of Finance",
+    hero_right_line1:"60–90 days: financial control",
+    hero_right_line2:"margin & liquidity protection",
+    hero_right_line3:"projects • groups • crisis",
+    hero_right_chip1:"How it works", hero_right_chip2:"Proof", hero_right_chip3:"ROI/EBITDA",
+    note_title:"Decision speed",
+    note_text:"AI tools reduce time for analytics, contract checks, supplier search and management reporting — without hiring.",
+    pain_title:"⚠️ Signs you need a CFO",
+    pain_sub:"Not reporting for reporting’s sake — but control: money → decisions → results.",
+    pain1_t:"Cash gaps", pain1_s:"Manual payments, no priorities, debts pile up.",
+    pain2_t:"Revenue without profit", pain2_s:"Margin leaks through costs, discounts and mistakes.",
+    pain3_t:"Debt pressure", pain3_s:"Covenants, schedule, DSO/DPO control.",
+    pain4_t:"No numbers for decisions", pain4_s:"No P&L by lines, no forecasts.",
+    res_title:"📈 Owner-friendly outcomes",
+    res_sub:"Numbers are the language of trust. Here are validated results.",
+    res1:"cash-gap reduced (100 → 30 mln ₽)",
+    res2:"interest saved via faster turnover",
+    res3:"cost reduced",
+    res4:"margin protected",
+    res_p1:"management reporting (P&L / CF)", res_p2:"scenario planning", res_p3:"payment calendar", res_p4:"financial models", res_p5:"AI acceleration",
+    offer_title:"💎 Offer: Turnaround CFO project",
+    offer_sub:"For owners: fast, transparent, measurable impact.",
+    st1_t:"Diagnostics 7–10 days", st1_s:"risk map, cash-gap, margin, liabilities, bottlenecks.",
+    st2_t:"Stabilization 30 days", st2_s:"cash-flow rules, payment calendar, priorities, control.",
+    st3_t:"Architecture 30–60 days", st3_s:"management accounting, P&L by lines, budgets, scenarios.",
+    st4_t:"Optimization & growth", st4_s:"cost, margin, banks, investment readiness.",
+    pc_badge:"fast start",
+    pc_title:"You get",
+    pc1:"clear financial picture",
+    pc2:"cash & payment rules",
+    pc3:"margin protection + cost control",
+    pc4:"plan/fact & cash-flow forecast",
+    pc5:"a system transferrable to your team",
+    pc_cta:"Get proposal ✉️",
+    pc_fine:"Pricing depends on scope and goals. 15-min call to align.",
+    ai_title:"AI as leverage",
+    ai_sub:"Supplier sourcing, contract pre-checks, competitor analysis, faster reporting & owner updates.",
+    calc_title:"🧮 Impact calculator (ROI + EBITDA uplift)",
+    calc_sub:"For meetings: change inputs — charts update instantly.",
+    c1:"Monthly cash gap, ₽", c2:"Gap reduction, %", c3:"Funding rate, % p.a.",
+    c4:"Annual turnover, ₽", c5:"Cost reduction, %", c6:"Margin protected, ₽", c7:"CFO project cost, ₽",
+    c8:"EBITDA margin, %", c9:"EBITDA uplift, %", c10:"EV/EBITDA multiple",
+    calc_btn:"Recalculate ✨",
+    calc_hint:"* Simplified formulas for negotiations. Exact numbers require diagnostics and data check.",
+    out1:"Total impact, ₽", out2:"ROI, %", out3:"Payback, months", out4:"Business value uplift, ₽",
+    roi_rule:"Auto highlight if ROI < 100%",
+    ch1:"Impact mix", ch2:"Payback over months",
+    sc_title:"Scenarios (stress / base / optimistic)", sc_stress:"Stress", sc_base:"Base", sc_opt:"Optimistic",
+    contact_title:"📩 Contact & next step",
+    contact_sub:"Share 2–3 numbers (turnover, cash gap, debt) — I’ll propose a working format.",
+    phone:"Phone", geo:"Location", geo_v:"Remote / on-site",
+    mini_title:"What you get in a 60-min diagnostics",
+    mini1:"risk & leakage map",
+    mini2:"14-day quick actions",
+    mini3:"60–90 day plan with KPIs",
+    form_title:"Quick request",
+    form_sub:"No backend here. Button opens a prefilled email draft.",
+    f1:"Name", f2:"Company & turnover", f3:"Key problem",
+    mail_btn:"Open email draft ✉️",
+    form_fine:"On Tilda, we can connect a native form — I’ll tailor it to your account.",
+    sig:"Focus: predictable cash & profit",
+    foot:"Elena Ermolova • CFO",
+    to_top:"Top", to_calc:"Calculator"
+  }
+};
+
+let currentLang = 'ru';
+
+function setLang(lang){
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    const val = dict[lang][key];
+    if (val) el.innerHTML = val;
+  });
+  document.getElementById('lang-ru')?.classList.toggle('chip--gold', lang==='ru');
+  document.getElementById('lang-en')?.classList.toggle('chip--gold', lang==='en');
+  document.getElementById('lang-ru')?.classList.toggle('chip--ghost', lang!=='ru');
+  document.getElementById('lang-en')?.classList.toggle('chip--ghost', lang!=='en');
+}
+document.getElementById('lang-ru')?.addEventListener('click', ()=>{ setLang('ru'); render(); });
+document.getElementById('lang-en')?.addEventListener('click', ()=>{ setLang('en'); render(); });
+setLang('ru');
+
+const el = (id)=>document.getElementById(id);
+const fmt = (n) => Number(n || 0).toLocaleString('ru-RU');
+
+let pieChart, lineChart;
+
+function compute(){
+  const cashGap = Number(el('cashGap').value || 0);
+  const gapReduce = Number(el('gapReduce').value || 0) / 100;
+  const rate = Number(el('rate').value || 0) / 100;
+  const turnover = Number(el('turnover').value || 0);
+  const costDown = Number(el('costDown').value || 0) / 100;
+  const marginProtect = Number(el('marginProtect').value || 0);
+  const cfoCost = Number(el('cfoCost').value || 0);
+
+  const ebitdaMargin = Number(el('ebitdaMargin').value || 0) / 100;
+  const ebitdaUpliftPct = Number(el('ebitdaUpliftPct').value || 0) / 100;
+  const multiple = Number(el('multiple').value || 0);
+
+  const interestSaving = cashGap * gapReduce * rate;
+  const costSaving = turnover * costDown;
+  const total = interestSaving + costSaving + marginProtect;
+
+  const roi = cfoCost > 0 ? ((total - cfoCost) / cfoCost) * 100 : 0;
+  const payback = total > 0 ? (cfoCost / (total/12)) : 0;
+
+  const baseEbitda = turnover * ebitdaMargin;
+  const upliftEbitda = baseEbitda * ebitdaUpliftPct;
+  const valueUplift = upliftEbitda * multiple;
+
+  const stress = (cashGap*(0.30)*rate) + (turnover*(0.03)) + (marginProtect*0.50);
+  const base = total;
+  const opt = (cashGap*(0.70)*rate) + (turnover*(0.10)) + (marginProtect*1.20);
+
+  return {interestSaving, costSaving, marginProtect, total, roi, payback, valueUplift, stress, base, opt};
+}
+
+function render(){
+  const r = compute();
+
+  el('outTotal').textContent = fmt(Math.round(r.total)) + " ₽";
+  el('outROI').textContent = (Math.round(r.roi*10)/10).toString().replace('.', ',') + " %";
+  el('outPayback').textContent = (Math.round(r.payback*10)/10).toString().replace('.', ',');
+  el('outValue').textContent = fmt(Math.round(r.valueUplift)) + " ₽";
+
+  const roiCard = document.getElementById('roiCard');
+  if (r.roi < 100) roiCard.classList.add('kcard--bad');
+  else roiCard.classList.remove('kcard--bad');
+
+  el('scStress').textContent = fmt(Math.round(r.stress)) + " ₽";
+  el('scBase').textContent = fmt(Math.round(r.base)) + " ₽";
+  el('scOpt').textContent = fmt(Math.round(r.opt)) + " ₽";
+
+  const pieData = [r.interestSaving, r.costSaving, r.marginProtect];
+  const pieLabels = currentLang === 'ru' ? ['Проценты', 'Себестоимость', 'Маржа'] : ['Interest', 'Cost', 'Margin'];
+
+  if (!pieChart){
+    pieChart = new Chart(document.getElementById('pie'), {
+      type:'doughnut',
+      data:{ labels: pieLabels, datasets:[{ data: pieData }]},
+      options:{ responsive:true, plugins:{ legend:{ labels:{ color:'#fff'} } } }
+    });
+  } else {
+    pieChart.data.labels = pieLabels;
+    pieChart.data.datasets[0].data = pieData;
+    pieChart.update();
+  }
+
+  const months = Array.from({length:12}, (_,i)=>i+1);
+  const cum = months.map(m => (r.total/12)*m);
+  const cost = months.map(_ => Number(el('cfoCost').value || 0));
+
+  if (!lineChart){
+    lineChart = new Chart(document.getElementById('line'), {
+      type:'line',
+      data:{
+        labels: months,
+        datasets:[
+          { label: currentLang==='ru'?'Накопленный эффект':'Cumulative impact', data: cum, tension:.25 },
+          { label: currentLang==='ru'?'Стоимость проекта':'Project cost', data: cost, tension:0 }
+        ]
+      },
+      options:{ responsive:true, plugins:{ legend:{ labels:{ color:'#fff'} } }, scales:{ x:{ ticks:{ color:'#fff'} }, y:{ ticks:{ color:'#fff'} } } }
+    });
+  } else {
+    lineChart.data.datasets[0].label = currentLang==='ru'?'Накопленный эффект':'Cumulative impact';
+    lineChart.data.datasets[1].label = currentLang==='ru'?'Стоимость проекта':'Project cost';
+    lineChart.data.datasets[0].data = cum;
+    lineChart.data.datasets[1].data = cost;
+    lineChart.update();
+  }
+}
+
+document.getElementById('recalc')?.addEventListener('click', (e)=>{ e.preventDefault(); render(); });
+['cashGap','gapReduce','rate','turnover','costDown','marginProtect','cfoCost','ebitdaMargin','ebitdaUpliftPct','multiple']
+  .forEach(id => el(id)?.addEventListener('input', ()=>render()));
+
+document.getElementById('mailBtn')?.addEventListener('click', ()=>{
+  const name = el('fName').value || '';
+  const biz = el('fBiz').value || '';
+  const prob = el('fProb').value || '';
+  const subject = encodeURIComponent('Запрос: диагностика CFO');
+  const body = encodeURIComponent(
+`Здравствуйте, Елена!
+
+Меня зовут ${name}.
+Компания/оборот: ${biz}
+Проблема: ${prob}
+
+Готов(а) обсудить диагностику. Удобное время: ____
+
+Спасибо!`
+  );
+  window.location.href = `mailto:example@email.com?subject=${subject}&body=${body}`;
+});
+
+document.getElementById('year').textContent = new Date().getFullYear();
+
+render();
+"""
+
+# Write files
+with open(os.path.join(base, "index.html"), "w", encoding="utf-8") as f:
+    f.write(index_html)
+with open(os.path.join(base, "styles.css"), "w", encoding="utf-8") as f:
+    f.write(styles_css)
+with open(os.path.join(base, "script.js"), "w", encoding="utf-8") as f:
+    f.write(script_js)
+
+# Build Tilda embed: inline CSS/JS + body content only
+body_content = index_html.split("<body>",1)[1].rsplit("</body>",1)[0]
+tilda_embed = f"""<!-- Tilda HTML block (T123) - вставьте целиком -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+<style>
+{styles_css}
+/* Подстройка для Tilda: если липкая шапка мешает — можно оставить relative */
+.topbar{{position:relative}}
+</style>
+
+{body_content}
+
+<script>
+{script_js}
+</script>
+<!-- /Tilda HTML block -->
+"""
+with open(os.path.join(base, "tilda_embed.html"), "w", encoding="utf-8") as f:
+    f.write(tilda_embed)
+
+# Zip package
+zip_path = "/mnt/data/cfo_site_package.zip"
+with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+    for p in pathlib.Path(base).glob("*"):
+        z.write(str(p), arcname=p.name)
+
+zip_path
